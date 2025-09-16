@@ -78,3 +78,4 @@ packages/
 
 # Database configuration files
 /Implem.Pleasanter/App_Data/Parameters/Rds.json
+/Implem.Pleasanter/App_Data/Parameters/Security.json
