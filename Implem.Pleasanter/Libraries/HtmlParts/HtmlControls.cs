@@ -211,6 +211,9 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                             .Add(attributes),
                         text: text);
                 case HtmlTypes.TextTypes.Password:
+                    var isDummyField = controlCss
+                        ?.Split(' ')
+                        .Contains("dummy") == true;
                     return hb.Input(
                         attributes: new HtmlAttributes()
                             .Id(controlId)
@@ -236,7 +239,8 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                             attributes: new HtmlAttributes()
                                 .Class("material-symbols-outlined show-password")
                                 .OnClick("$p.showPassword(this)"),
-                            action: () => hb.Text("visibility"));
+                            action: () => hb.Text("visibility"),
+                            _using: !isDummyField);
                 case HtmlTypes.TextTypes.File:
                     return hb.Input(attributes: new HtmlAttributes()
                         .Id(controlId)
@@ -340,6 +344,49 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                     allowImage: allowImage,
                     mobile: mobile,
                     preview: preview);
+            return hb;
+        }
+
+        public static HtmlBuilder RTEditor(
+            this HtmlBuilder hb,
+            Context context,
+            SiteSettings ss,
+            string controlId = null,
+            string controlCss = null,
+            string text = null,
+            string placeholder = null,
+            bool readOnly = false,
+            bool disabled = false,
+            bool allowImage = true,
+            bool allowBulkUpdate = false,
+            bool mobile = false,
+            bool alwaysSend = false,
+            bool validateRequired = false,
+            Column.ViewerSwitchingTypes viewerSwitchingTypes = Column.ViewerSwitchingTypes.Auto,
+            Dictionary<string, string> attributes = null,
+            bool preview = false,
+            bool _using = true,
+            int validateMaxLength = 0,
+            string validateRegex = null,
+            string validateRegexErrorMessage = null)
+        {
+            if (!_using) return hb;
+            hb.RichTextEditor(
+                action: () => hb.TextArea(
+                    attributes: new HtmlAttributes()
+                        .Id(controlId)
+                        .Name(controlId)
+                        .Placeholder(placeholder)
+                        .Disabled(disabled)
+                        .DataAlwaysSend(alwaysSend)
+                        .DataValidateRequired(validateRequired, _using: !readOnly)
+                        .DataValidateRegex(validateRegex)
+                        .DataValidateRegexErrorMessage(validateRegexErrorMessage)
+                        .DataReadOnly(readOnly)
+                        .Add(attributes)
+                        .Add("data-enablelightbox", Implem.DefinitionAccessor.Parameters.General.EnableLightBox ? "1" : "0"),
+                    text: text)
+            );
             return hb;
         }
 
@@ -617,6 +664,7 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
             decimal step = -1,
             int width = -1,
             string unit = null,
+            string placeholder = null,
             bool alwaysSend = false,
             bool allowBalnk = false,
             string onChange = null,
@@ -643,6 +691,7 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                             value != null
                                 ? value.ToString()
                                 : string.Empty)
+                        .Placeholder(placeholder)
                         .DataMin(min, _using: min != -1)
                         .DataMax(max, _using: max != -1)
                         .DataStep(step, _using: step != -1)

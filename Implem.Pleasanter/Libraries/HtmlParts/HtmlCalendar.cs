@@ -401,10 +401,12 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
             Dictionary<string, ControlData> choices)
         {
             return hb.GridTable(
+                context: context,
                 id: ss.DashboardParts.Count == 0
                     ? "Grid"
                     : "",
                 css: "fixed",
+                scrollable: false,
                 action: () => hb
                     .THead(action: () => hb
                         .Tr(action: () =>
@@ -419,7 +421,7 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                                 hb.Th(action: () => hb
                                     .A(
                                         css: "calendar-to-monthly",
-                                        href: "javascript:void(0);",
+                                        href: "#",
                                         attributes: new HtmlAttributes()
                                             .DataId(currentDate.ToString()),
                                         action: () => hb
@@ -463,10 +465,12 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
             Dictionary<string, ControlData> choices)
         {
             return hb.GridTable(
+                context: context,
                 id: ss.DashboardParts.Count == 0
                     ? "Grid"
                     : "",
                 css: "fixed",
+                scrollable: false,
                 action: () => hb
                     .THead(action: () => hb
                         .Tr(action: () =>
@@ -537,10 +541,12 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
             Dictionary<string, ControlData> choices)
         {
             return hb.GridTable(
+                context: context,
                 id: ss.DashboardParts.Count == 0
                     ? "Grid"
                     : "",
                 css: "fixed",
+                scrollable: false,
                 action: () => hb
                     .THead(action: () => hb
                         .Tr(action: () =>

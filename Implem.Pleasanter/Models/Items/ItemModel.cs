@@ -1265,7 +1265,7 @@ namespace Implem.Pleasanter.Models
             SetSite(context: context);
             var dataTableName = context.Forms.Data("TableId");
             return new ResponseCollection(context: context)
-                .ReplaceAll("#" + dataTableName, new HtmlBuilder()
+                .ReplaceAll("#" + dataTableName + "Wrap", new HtmlBuilder()
                     .LinkTable(
                         context: context,
                         siteId: context.Forms.Long("TableSiteId"),
@@ -3224,6 +3224,27 @@ namespace Implem.Pleasanter.Models
                         {
                             Data = response
                         });
+                default:
+                    return null;
+            }
+        }
+
+        public ResponseFile VisualizeSettings(Context context)
+        {
+            SetSite(
+                context: context,
+                initSiteSettings: true,
+                setSiteIntegration: true);
+            switch (Site.ReferenceType)
+            {
+                case "Sites":
+                case "Issues":
+                case "Results":
+                case "Wikis":
+                case "Dashboards":
+                    return Libraries.SiteManagement.Utilities.VisualizeSettings(
+                        context: context,
+                        ss: Site.SiteSettings);
                 default:
                     return null;
             }

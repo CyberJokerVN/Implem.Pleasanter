@@ -402,6 +402,7 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                 return hb.Div(id: "SwitchUserInfo", action: () => hb
                     .A(
                         href: "#",
+                        css: "void-zero",
                         attributes: new HtmlAttributes()
                             .OnClick("location.href='{0}'; ".Params(
                                 Locations.Get(
@@ -417,7 +418,8 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                 return context.SwitchUser
                     ? hb.Div(id: "SwitchUserInfo", action: () => hb
                         .A(
-                            href: "javascript:void(0);",
+                            href: "#",
+                            css: "void-zero",
                             attributes: new HtmlAttributes()
                                 .OnClick("$p.ajax('{0}','post',null,$('#SwitchUserInfo a'));".Params(
                                     Locations.Get(
@@ -657,7 +659,7 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                     .Hidden(controlId: "DeptId", value: context.DeptId.ToString())
                     .Hidden(controlId: "UserId", value: context.UserId.ToString())
                     .Hidden(controlId: "LoginId", value: context.LoginId)
-                    .Hidden(controlId: "GroupIds", value: context.Groups.ToJson())
+                    .Hidden(controlId: "GroupIds", value: (context.Groups?.Distinct()?.ToArray() ?? Array.Empty<int>()).ToJson())
                     .Hidden(controlId: "Theme", value: context.Theme())
                     .Hidden(controlId: "Publish", value: "1", _using: context.Publish)
                     .Hidden(controlId: "Responsive", value: "1", _using: context.Responsive)
@@ -696,6 +698,18 @@ namespace Implem.Pleasanter.Libraries.HtmlParts
                     .Hidden(
                         controlId: "data-validation-maxlength-regex",
                         value: Parameters.Validation.SingleByteCharactorRegexClient)
+                    .Hidden(
+                        controlId: "RteDefaultFont",
+                        value: Parameters.TextEditorUI.RichTextEditor.DefaultFont?.Join(","),
+                        _using: Parameters.TextEditorUI.RichTextEditor.DefaultFont != null)
+                    .Hidden(
+                        controlId: "RteFontList",
+                        value: Parameters.TextEditorUI.RichTextEditor.FontList?.Join(","),
+                        _using: Parameters.TextEditorUI.RichTextEditor.FontList != null)
+                    .Hidden(
+                        controlId: "RteFontSize",
+                        value: Parameters.TextEditorUI.RichTextEditor.FontSize?.Join(","),
+                        _using: Parameters.TextEditorUI.RichTextEditor.FontSize != null)
                 : hb;
         }
 

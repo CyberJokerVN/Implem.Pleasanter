@@ -3,8 +3,8 @@ using Implem.Libraries.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
-using System.Reflection.Metadata;
 using System.Threading;
 namespace Implem.Pleasanter.Libraries.ServerScripts
 {
@@ -20,119 +20,47 @@ namespace Implem.Pleasanter.Libraries.ServerScripts
         public int TimeOut { get; set; } = Parameters.Script.ServerScriptHttpClientTimeOut;
         public int StatusCode { get; private set; }
         public bool IsSuccess { get; private set; }
+        public bool IsTimeOut { get; private set; }
 
         static ServerScriptModelHttpClient()
         {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient()
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
         }
 
-        public string Get()
+        public string Get() => Core(HttpMethod.Get);
+
+        public string Post() => Core(HttpMethod.Post, CreateContent());
+
+        public string Put() => Core(HttpMethod.Put, CreateContent());
+
+        public string Patch() => Core(HttpMethod.Patch, CreateContent());
+
+        public string Delete() => Core(HttpMethod.Delete);
+
+        private string Core(HttpMethod method, HttpContent content = null)
         {
             try
             {
-                var request = CreateHttpRequest(HttpMethod.Get);
-                _httpClient.Timeout = GetTimeOut();
-                var response = _httpClient.SendAsync(request).Result;
-                StatusCode = (int)response.StatusCode;
-                IsSuccess = response.IsSuccessStatusCode;
-                foreach (var header in response.Headers)
+                ResponseHeaders.Clear();
+                StatusCode = default;
+                IsSuccess = false;
+                IsTimeOut = false;
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(GetTimeOut());
+                var request = CreateHttpRequest(method, content);
+                HttpResponseMessage response;
+                try
                 {
-                    ResponseHeaders.Add(header.Key, header.Value.ToArray());
+                    response = _httpClient.SendAsync(request, cts.Token).Result;
                 }
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                return responseContent;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public string Post()
-        {
-            try
-            {
-                var content = new StringContent(
-                    content: Content,
-                    encoding: System.Text.Encoding.GetEncoding(Encoding),
-                    mediaType: MediaType);
-                var request = CreateHttpRequest(HttpMethod.Post, content);
-                _httpClient.Timeout = GetTimeOut();
-                var response = _httpClient.SendAsync(request).Result;
-                StatusCode = (int)response.StatusCode;
-                IsSuccess = response.IsSuccessStatusCode;
-                foreach (var header in response.Headers)
+                catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token)
                 {
-                    ResponseHeaders.Add(header.Key, header.Value.ToArray());
+                    IsTimeOut = true;
+                    return default;
                 }
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                return responseContent;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public string Put()
-        {
-            try
-            {
-                var content = new StringContent(
-                    content: Content,
-                    encoding: System.Text.Encoding.GetEncoding(Encoding),
-                    mediaType: MediaType);
-                var request = CreateHttpRequest(HttpMethod.Put, content);
-                _httpClient.Timeout = GetTimeOut();
-                var response = _httpClient.SendAsync(request).Result;
-                StatusCode = (int)response.StatusCode;
-                IsSuccess = response.IsSuccessStatusCode;
-                foreach (var header in response.Headers)
-                {
-                    ResponseHeaders.Add(header.Key, header.Value.ToArray());
-                }
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                return responseContent;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public string Patch()
-        {
-            try
-            {
-                var content = new StringContent(
-                    content: Content,
-                    encoding: System.Text.Encoding.GetEncoding(Encoding),
-                    mediaType: MediaType);
-                var request = CreateHttpRequest(HttpMethod.Patch, content);
-                _httpClient.Timeout = GetTimeOut();
-                var response = _httpClient.SendAsync(request).Result;
-                StatusCode = (int)response.StatusCode;
-                IsSuccess = response.IsSuccessStatusCode;
-                foreach (var header in response.Headers)
-                {
-                    ResponseHeaders.Add(header.Key, header.Value.ToArray());
-                }
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                return responseContent;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public string Delete()
-        {
-            try
-            {
-                var request = CreateHttpRequest(HttpMethod.Delete);
-                _httpClient.Timeout = GetTimeOut();
-                var response = _httpClient.SendAsync(request).Result;
                 StatusCode = (int)response.StatusCode;
                 IsSuccess = response.IsSuccessStatusCode;
                 foreach (var header in response.Headers)
@@ -150,15 +78,29 @@ namespace Implem.Pleasanter.Libraries.ServerScripts
 
         private HttpRequestMessage CreateHttpRequest(HttpMethod method, HttpContent content = null)
         {
-            var request = new HttpRequestMessage();
-            request.Method = method;
-            request.RequestUri = new Uri(RequestUri);
-            request.Content = content;
+            var request = new HttpRequestMessage()
+            {
+                Method = method,
+                RequestUri = new Uri(RequestUri),
+                Content = content
+            };
             foreach (var header in RequestHeaders)
             {
                 request.Headers.Add(header.Key, header.Value);
             }
             return request;
+        }
+
+        private HttpContent CreateContent()
+        {
+            if (Content.IsNullOrEmpty())
+            {
+                return null;
+            }
+            return new StringContent(
+                content: Content,
+                encoding: System.Text.Encoding.GetEncoding(Encoding),
+                mediaType: MediaType);
         }
 
         private TimeSpan GetTimeOut()

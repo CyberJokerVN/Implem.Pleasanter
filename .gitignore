@@ -49,6 +49,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 /.vs
+/.vscode
 
 # Build results
 [Dd]ebug/
@@ -69,13 +70,27 @@ bld/
 PublishProfiles/
 BinaryStorage/
 bundles/
+content/
 Histories/
 Logs/
 Temp/
 packages/
+node_modules/
+TestResults/
 /Implem.CodeDefiner.NetCore/Properties/launchSettings.json
 /Implem.Pleasanter/App_Data/Temp/
+<<<<<<< HEAD
 
 # Database configuration files
 /Implem.Pleasanter/App_Data/Parameters/Rds.json
 /Implem.Pleasanter/App_Data/Parameters/Security.json
+=======
+Env.json
+.env
+*.env
+
+/Implem.Pleasanter/wwwroot/**/*.map
+/Implem.Pleasanter/wwwroot/assets
+/Implem.Pleasanter/wwwroot/components/watch
+/Implem.Pleasanter/wwwroot/operations-tools
+>>>>>>> 7c416d9f5cac9275bd940e17985abf2f22fac6fa
